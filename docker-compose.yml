@@ -1,0 +1,37 @@
+version: '3.6'
+services:
+  db:
+    image: postgres:10.6-alpine
+    restart: always
+    volumes:
+    - ./postgres_data:/var/lib/postgresql/data
+    # FIXME only for external pgadmin access
+    ports:
+    - "5432:5432"
+    environment:
+    - POSTGRES_DB=movie-demo
+  movie-service:
+    image: sanderdahlberg/movie-service:latest
+    ports:
+    - "8080:8080"
+    depends_on:
+    - db
+    environment:
+    - DATABASE_USER=postgres
+    - DATABASE_PASSWORD=admin
+  movie-adapter:
+    image: sanderdahlberg/movie-adapter:latest
+    ports:
+    - "8081:8080"
+    depends_on:
+    - db
+    environment:
+    - DATABASE_USER=postgres
+    - DATABASE_PASSWORD=admin
+  movie-angular-app:
+    image: sanderdahlberg/movie-angular-app:latest
+    ports:
+    - "4200:80"
+    environment:
+    - GATEWAY_IP=192.168.99.100
+    - GATEWAY_PORT=4200
