@@ -1,34 +1,52 @@
 version: '3.6'
 services:
-  db:
-    image: postgres:10.6-alpine
-    restart: always
-    volumes:
-    - ./postgres_data:/var/lib/postgresql/data
-    # FIXME only for external pgadmin access
+  movie-postgres:
+    container_name: movie-postgres-10.6
+    image: sanderdahlberg/movie-postgres:latest
     ports:
     - "5432:5432"
+#    restart: unless-stopped
+    volumes:
+    - ./postgres_data:/var/lib/postgresql/data
+  pgadmin4:
+    container_name: pgadmin4
+    image: dpage/pgadmin4
+    ports:
+    - 8200:80
     environment:
-    - POSTGRES_DB=movie-demo
+      PGADMIN_DEFAULT_EMAIL: sander.dahlberg@outlook.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3.7.8-management
+    ports:
+    - 5672:5672
+    - 15672:15672
+
   movie-service:
+    container_name: movie-service
     image: sanderdahlberg/movie-service:latest
     ports:
     - "8080:8080"
     depends_on:
-    - db
+    - movie-postgres
     environment:
-    - DATABASE_USER=postgres
-    - DATABASE_PASSWORD=admin
+    - DATABASE_USER=movie
+    - DATABASE_PASSWORD=movie
   movie-adapter:
+    container_name: movie-adapter
     image: sanderdahlberg/movie-adapter:latest
     ports:
     - "8081:8080"
+    - "5005:5005"
     depends_on:
-    - db
+    - movie-postgres
     environment:
-    - DATABASE_USER=postgres
-    - DATABASE_PASSWORD=admin
+    - DATABASE_USER=movie
+    - DATABASE_PASSWORD=movie
   movie-angular-app:
+    container_name: movie-angular-app
     image: sanderdahlberg/movie-angular-app:latest
     ports:
     - "4200:80"
