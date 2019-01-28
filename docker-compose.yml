@@ -5,7 +5,7 @@ services:
     image: sanderdahlberg/movie-postgres:latest
     ports:
     - "5432:5432"
-#    restart: unless-stopped
+    #    restart: unless-stopped
     volumes:
     - ./postgres_data:/var/lib/postgresql/data
   pgadmin4:
@@ -29,6 +29,7 @@ services:
     image: sanderdahlberg/movie-service:latest
     ports:
     - "8080:8080"
+    - "5005:5005"
     depends_on:
     - movie-postgres
     environment:
@@ -39,7 +40,7 @@ services:
     image: sanderdahlberg/movie-adapter:latest
     ports:
     - "8081:8080"
-    - "5005:5005"
+    - "5006:5005"
     depends_on:
     - movie-postgres
     environment:
